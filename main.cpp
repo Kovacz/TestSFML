@@ -74,8 +74,12 @@ int sign(Value Val)
 
 look lookAtMouse(int x, int y)
 {
+<<<<<<< HEAD
 	float direction = mtrAngle_f(x, y);
 	if (direction > 337.5f && direction <= 0.0f)
+=======
+	if (x == 1 && y == 0)
+>>>>>>> 8f5ce36c71c8adf43524508799483a198830a354
 	{
 		return look::right;
 	}
@@ -91,7 +95,11 @@ look lookAtMouse(int x, int y)
 	{
 		return look::up;
 	}
+<<<<<<< HEAD
 	else if (direction > 300.5f && direction <= 325.0f)
+=======
+	else if (x == 1 && y == 1)
+>>>>>>> 8f5ce36c71c8adf43524508799483a198830a354
 	{
 		return look::downright;
 	}
@@ -174,7 +182,11 @@ int main()
 
 			cout << mtrAngle_f(totalMovement.x, totalMovement.y) << endl;
 
+<<<<<<< HEAD
 			if (lookAtMouse(totalMovement.x, totalMovement.y) == look::up)
+=======
+			if (lookAtMouse(dir_x, dir_y) == look::up)
+>>>>>>> 8f5ce36c71c8adf43524508799483a198830a354
 			{
 				CurrentFrame += 0.005 * time;
 				if (CurrentFrame > 8)
