@@ -3,6 +3,7 @@
 #include <SFML\Graphics.hpp>
 #define MTR_2PI_F 6.283185307179586f
 #define MTR_RADIAN_F 57.295779513082320876798154814105f
+#define step 100
 
 using namespace sf; 
 using namespace std;
@@ -23,17 +24,33 @@ float mtrAngle_f(float x, float y)
 	return dir * MTR_RADIAN_F;
 }
 
-bool is_equal(double x, double y) 
+void animation(float &CurrentFrame, float &time, Sprite &hero_sprite, Vector2f &totalMovement, int scale)
 {
-	return std::fabs(x - y) < std::numeric_limits<double>::epsilon();
+	CurrentFrame += 0.005 * time;
+	if (CurrentFrame > 8)
+		CurrentFrame -= 8;
+	hero_sprite.setTextureRect(IntRect(128 * int(CurrentFrame), scale, 128, 128));
+	hero_sprite.move(totalMovement* time * 0.001f);
 }
 
-template <class Value>
-int sign(Value Val)
+void checkStep(Vector2f &totalMovement)
 {
-	if (is_equal(Val, 0.))  return 0;
-	if (Val >  0.)  return 1;
-	else return -1;
+	if (totalMovement.x > step)
+	{
+		totalMovement.x = step;
+	}
+	if (totalMovement.y > step)
+	{
+		totalMovement.y = step;
+	}
+	if (totalMovement.x < -step)
+	{
+		totalMovement.x = -step;
+	}
+	if (totalMovement.y < -step)
+	{
+		totalMovement.y = -step;
+	}
 }
 
 look lookAtMouse(int x, int y)
@@ -43,31 +60,31 @@ look lookAtMouse(int x, int y)
 	{
 		return look::right;
 	}
-	else if (direction > 270.5f && direction <= 290.0f)
+	if (direction > 270.5f && direction <= 290.0f)
 	{
 		return look::down;
 	}
-	else if (direction > 170.5f && direction <= 220.0f)
+	if (direction > 170.5f && direction <= 220.0f)
 	{
 		return look::left;
 	}
-	else if (direction > 67.5f && direction <= 90.0f)
+	if (direction > 67.5f && direction <= 90.0f)
 	{
 		return look::up;
 	}
-	else if (direction > 300.5f && direction <= 325.0f)
+	if (direction > 300.5f && direction <= 325.0f)
 	{
 		return look::downright;
 	}
-	else if (direction > 22.5f && direction <= 67.5f)
+	if (direction > 22.5f && direction <= 67.5f)
 	{
 		return look::upright;
 	}
-	else if (direction > 90.5f && direction <= 220.5f)
+	if (direction > 90.5f && direction <= 220.5f)
 	{
 		return look::upleft;
 	}
-	else if (direction > 220.5f && direction <= 290.5f)
+	if (direction > 220.5f && direction <= 290.5f)
 	{
 		return look::downleft;
 	}
@@ -88,7 +105,7 @@ int main()
 	hero_sprite.setRotation(0);
 
 
-	double CurrentFrame = 0;
+	float CurrentFrame = 0;
 	Clock clock;
 	while ( window.isOpen() )
 	{
@@ -109,92 +126,40 @@ int main()
 			totalMovement.x = Mouse::getPosition(window).x - hero_sprite.getPosition().x;
 			totalMovement.y = Mouse::getPosition(window).y - hero_sprite.getPosition().y;
 
-			if (totalMovement.x > 100)
-			{
-				totalMovement.x = 100;
-			}
-			if (totalMovement.y > 100)
-			{
-				totalMovement.y = 100;
-			}
-			if (totalMovement.x < -100)
-			{
-				totalMovement.x = -100;
-			}
-			if (totalMovement.y < -100)
-			{
-				totalMovement.y = -100;
-			}
-
-
-			double dir_x = sign(totalMovement.x);
-			double dir_y = sign(totalMovement.y);
-
 			cout << mtrAngle_f(totalMovement.x, totalMovement.y) << endl;
+
 
 			if (lookAtMouse(totalMovement.x, totalMovement.y) == look::up)
 			{
-				CurrentFrame += 0.005 * time;
-				if (CurrentFrame > 8)
-					CurrentFrame -= 8;
-				hero_sprite.setTextureRect(IntRect(128 * int(CurrentFrame), 254, 128, 128));
-				hero_sprite.move(totalMovement * time * 0.001f);
+				animation(CurrentFrame, time, hero_sprite, totalMovement, 254);
 			}
 			else if (lookAtMouse(totalMovement.x, totalMovement.y) == look::down)
 			{
-				CurrentFrame += 0.005*time;
-				if (CurrentFrame > 8)
-					CurrentFrame -= 8;
-				hero_sprite.setTextureRect(IntRect(128 * int(CurrentFrame), 762, 128, 128));
-				hero_sprite.move(totalMovement * time * 0.001f);
+				animation(CurrentFrame, time, hero_sprite, totalMovement, 762);
 			}
 			else if (lookAtMouse(totalMovement.x, totalMovement.y) == look::left)
 			{
-				CurrentFrame += 0.005*time;
-				if (CurrentFrame > 8)
-					CurrentFrame -= 8;
-				hero_sprite.setTextureRect(IntRect(128 * int(CurrentFrame), 0, 128, 128));
-				hero_sprite.move(totalMovement * time * 0.001f);
+				animation(CurrentFrame, time, hero_sprite, totalMovement, 0);
 			}
 			else if (lookAtMouse(totalMovement.x, totalMovement.y) == look::right)
 			{
-				CurrentFrame += 0.005*time;
-				if (CurrentFrame > 8)
-					CurrentFrame -= 8;
-				hero_sprite.setTextureRect(IntRect(128 * int(CurrentFrame), 508, 128, 128));
-				hero_sprite.move(totalMovement * time * 0.001f);
+				animation(CurrentFrame, time, hero_sprite, totalMovement, 508);
 			}
-			else if (lookAtMouse(dir_x, dir_y) == look::downright)
+			else if (lookAtMouse(totalMovement.x, totalMovement.y) == look::downright)
 			{
-				CurrentFrame += 0.005*time; 
-				if (CurrentFrame > 8) 
-					CurrentFrame -= 8;
-				hero_sprite.setTextureRect(IntRect(128 * int(CurrentFrame), 635, 128, 128)); 
-				hero_sprite.move(totalMovement * time * 0.001f);
+				animation(CurrentFrame, time, hero_sprite, totalMovement, 635);
 			}
-			else if (lookAtMouse(dir_x, dir_y) == look::upright)
+			else if (lookAtMouse(totalMovement.x, totalMovement.y) == look::upright)
 			{
-				CurrentFrame += 0.005 * time;
-				if (CurrentFrame > 8)
-					CurrentFrame -= 8;
-				hero_sprite.setTextureRect(IntRect(128 * int(CurrentFrame), 381, 128, 128));
-				hero_sprite.move(totalMovement * time * 0.001f);
+				animation(CurrentFrame, time, hero_sprite, totalMovement, 381);
 			}
-			else if (lookAtMouse(dir_x, dir_y) == look::upleft)
+			else if (lookAtMouse(totalMovement.x, totalMovement.y) == look::upleft)
 			{
-				CurrentFrame += 0.005*time;
-				if (CurrentFrame > 8)
-					CurrentFrame -= 8;
-				hero_sprite.setTextureRect(IntRect(128 * int(CurrentFrame), 127, 128, 128));
-				hero_sprite.move(totalMovement * time * 0.001f);
+				animation(CurrentFrame, time, hero_sprite, totalMovement, 127);
 			}
-			else if (lookAtMouse(dir_x, dir_y) == look::downleft)
+			else if (lookAtMouse(totalMovement.x, totalMovement.y) == look::downleft)
 			{
-				CurrentFrame += 0.005*time;
-				if (CurrentFrame > 8)
-					CurrentFrame -= 8;
-				hero_sprite.setTextureRect(IntRect(128 * int(CurrentFrame), 889, 128, 128));
-				hero_sprite.move(totalMovement * time * 0.001f);
+				animation(CurrentFrame, time, hero_sprite, totalMovement, 889);
 			}
 				
 		}
