@@ -24,7 +24,6 @@ int sign(Value Val)
 
 look lookAtMouse(int x, int y)
 {
-<<<<<<< HEAD
 	if (x == 1 && y == 0)
 	{
 		return look::right;
@@ -42,9 +41,6 @@ look lookAtMouse(int x, int y)
 		return look::up;
 	}
 	else if (x == 1 && y == 1)
-=======
-	if (x == 1 && y == 1)
->>>>>>> 47e277a3312cff6cc06500a51ad2d4cd7d1e4106
 	{
 		return look::downright;
 	}
@@ -60,6 +56,12 @@ look lookAtMouse(int x, int y)
 	{
 		return look::downleft;
 	}
+}
+
+void MoveTo(Sprite hero_sprite)
+{
+	//Vector2i coords(Mouse::getPosition(window));
+	//hero_sprite.setPosition( coords );
 }
 
 int main()
@@ -105,7 +107,6 @@ int main()
 
 			cout << dir_x << " " << dir_y << endl;
 
-<<<<<<< HEAD
 			if (lookAtMouse(dir_x, dir_y) == look::up)
 			{
 				CurrentFrame += 0.005*time;
@@ -139,9 +140,6 @@ int main()
 				hero_sprite.move(totalMovement * (1.f / 1000.f));
 			}
 			else if (lookAtMouse(dir_x, dir_y) == look::downright)
-=======
-			if (lookAtMouse(dir_x, dir_y) == look::downright)
->>>>>>> 47e277a3312cff6cc06500a51ad2d4cd7d1e4106
 			{
 				CurrentFrame += 0.005*time; 
 				if (CurrentFrame > 8) 
