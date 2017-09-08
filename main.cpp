@@ -1,39 +1,3 @@
-//#include "level.h"
-//#include "view.h"
-//
-//int main()
-//{
-//	Level level;
-//	level.LoadFromFile("map.tmx");
-//
-//	sf::RenderWindow window(sf::VideoMode(800, 600), "Test");
-//	view.reset(sf::FloatRect(0, 0, 800, 600));
-//
-//	sf::Clock clock;
-//	while (window.isOpen())
-//	{
-//		float time = clock.getElapsedTime().asMicroseconds();
-//		clock.restart();
-//		time = time / 800;
-//
-//		sf::Event event;
-//		while (window.pollEvent(event))
-//		{
-//			if (event.type == sf::Event::Closed)
-//				window.close();
-//		}
-//
-//		viewmap(time);//функция скроллинга карты, передаем ей время sfml
-//		window.setView(view);
-//		window.clear(sf::Color(77, 83, 140));
-//		level.Draw(window);//"оживляем" камеру в окне sfml
-//		window.display();
-//
-//	}
-//
-//	return 0;
-//}
-
 #include <iostream>
 #include <SFML\Graphics.hpp>
 
@@ -55,22 +19,6 @@ int sign(Value Val)
 
 look lookAtMouse(int x, int y)
 {
-	if (x == 1 )
-	{
-		return look::right;
-	}
-	if (x == -1)
-	{
-		return look::left;
-	}
-	if (y == -1)
-	{
-		return look::down;
-	}
-	if (y == 1)
-	{
-		return look::up;
-	}
 	if (x == 1 && y == 1)
 	{
 		return look::downright;
@@ -87,12 +35,6 @@ look lookAtMouse(int x, int y)
 	{
 		return look::downleft;
 	}
-}
-
-void MoveTo(Sprite hero_sprite)
-{
-	//Vector2i coords(Mouse::getPosition(window));
-	//hero_sprite.setPosition( coords );
 }
 
 int main()
@@ -138,39 +80,7 @@ int main()
 
 			cout << dir_x << " " << dir_y << endl;
 
-			if (lookAtMouse(dir_x, dir_y) == look::up)
-			{
-				CurrentFrame += 0.005*time;
-				if (CurrentFrame > 8)
-					CurrentFrame -= 8;
-				hero_sprite.setTextureRect(IntRect(128 * int(CurrentFrame), 254, 128, 128));
-				hero_sprite.move(totalMovement * (1.f / 1000.f));
-			}
-			if (lookAtMouse(dir_x, dir_y) == look::down)
-			{
-				CurrentFrame += 0.005*time;
-				if (CurrentFrame > 8)
-					CurrentFrame -= 8;
-				hero_sprite.setTextureRect(IntRect(128 * int(CurrentFrame), 762, 128, 128));
-				hero_sprite.move(totalMovement * (1.f / 1000.f));
-			}
-			else if (lookAtMouse(dir_x, dir_y) == look::left)
-			{
-				CurrentFrame += 0.005*time;
-				if (CurrentFrame > 8)
-					CurrentFrame -= 8;
-				hero_sprite.setTextureRect(IntRect(128 * int(CurrentFrame), 0, 128, 128));
-				hero_sprite.move(totalMovement * (1.f / 1000.f));
-			}
-			else if (lookAtMouse(dir_x, dir_y) == look::right)
-			{
-				CurrentFrame += 0.005*time;
-				if (CurrentFrame > 8)
-					CurrentFrame -= 8;
-				hero_sprite.setTextureRect(IntRect(128 * int(CurrentFrame), 508, 128, 128));
-				hero_sprite.move(totalMovement * (1.f / 1000.f));
-			}
-			else if (lookAtMouse(dir_x, dir_y) == look::downright)
+			if (lookAtMouse(dir_x, dir_y) == look::downright)
 			{
 				CurrentFrame += 0.005*time; 
 				if (CurrentFrame > 8) 
