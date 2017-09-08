@@ -1,35 +1,214 @@
-#include "level.h"
-#include "view.h"
+//#include "level.h"
+//#include "view.h"
+//
+//int main()
+//{
+//	Level level;
+//	level.LoadFromFile("map.tmx");
+//
+//	sf::RenderWindow window(sf::VideoMode(800, 600), "Test");
+//	view.reset(sf::FloatRect(0, 0, 800, 600));
+//
+//	sf::Clock clock;
+//	while (window.isOpen())
+//	{
+//		float time = clock.getElapsedTime().asMicroseconds();
+//		clock.restart();
+//		time = time / 800;
+//
+//		sf::Event event;
+//		while (window.pollEvent(event))
+//		{
+//			if (event.type == sf::Event::Closed)
+//				window.close();
+//		}
+//
+//		viewmap(time);//функция скроллинга карты, передаем ей время sfml
+//		window.setView(view);
+//		window.clear(sf::Color(77, 83, 140));
+//		level.Draw(window);//"оживляем" камеру в окне sfml
+//		window.display();
+//
+//	}
+//
+//	return 0;
+//}
+
+#include <iostream>
+#include <SFML\Graphics.hpp>
+
+using namespace sf; 
+using namespace std;
+
+enum look
+{
+	right, left, down, up, downright, upright, upleft, downleft
+};
+
+template <class Value>
+int sign(Value Val)
+{
+	if (Val == 0.)  return 0;
+	if (Val >  0.)  return 1;
+	else return -1;
+}
+
+look lookAtMouse(int x, int y)
+{
+	if (x == 1 )
+	{
+		return look::right;
+	}
+	if (x == -1)
+	{
+		return look::left;
+	}
+	if (y == -1)
+	{
+		return look::down;
+	}
+	if (y == 1)
+	{
+		return look::up;
+	}
+	if (x == 1 && y == 1)
+	{
+		return look::downright;
+	}
+	if (x == 1 && y == -1)
+	{
+		return look::upright;
+	}
+	if (x == -1 && y == -1)
+	{
+		return look::upleft;
+	}
+	if (x == -1 && y == 1)
+	{
+		return look::downleft;
+	}
+}
+
+void MoveTo(Sprite hero_sprite)
+{
+	//Vector2i coords(Mouse::getPosition(window));
+	//hero_sprite.setPosition( coords );
+}
 
 int main()
 {
-	Level level;
-	level.LoadFromFile("map.tmx");
+	RenderWindow window(VideoMode(800, 600), "SFML works!");
 
-	sf::RenderWindow window(sf::VideoMode(800, 600), "Test");
-	view.reset(sf::FloatRect(0, 0, 800, 600));
+	Texture hero_texture;
+	hero_texture.loadFromFile("textures/heroes/lol.png");
 
-	sf::Clock clock;
-	while (window.isOpen())
+	Sprite hero_sprite;
+	hero_sprite.setTexture(hero_texture);
+	hero_sprite.setTextureRect(IntRect(900, 765, 127, 127));
+	hero_sprite.setOrigin(50, 50);
+	hero_sprite.setPosition(250, 250);
+	hero_sprite.setRotation(0);
+
+
+	double CurrentFrame = 0;
+	Clock clock;
+
+	while ( window.isOpen() )
 	{
-		float time = clock.getElapsedTime().asMicroseconds();
-		clock.restart();
-		time = time / 800;
+		double time = clock.getElapsedTime().asMicroseconds(); 
+		clock.restart();   
+		time = time / 800; 
 
-		sf::Event event;
-		while (window.pollEvent(event))
+		Event event;
+		while ( window.pollEvent(event) )
 		{
-			if (event.type == sf::Event::Closed)
+			if ( event.type == Event::Closed )
 				window.close();
 		}
 
-		viewmap(time);//функция скроллинга карты, передаем ей время sfml
-		window.setView(view);
-		window.clear(sf::Color(77, 83, 140));
-		level.Draw(window);//"оживляем" камеру в окне sfml
-		//window.clear();
-		window.display();
+		if ( Mouse::isButtonPressed(Mouse::Right) )
+		{
+			
+			Vector2f totalMovement;
+			totalMovement.x = Mouse::getPosition(window).x - hero_sprite.getPosition().x;
+			totalMovement.y = Mouse::getPosition(window).y - hero_sprite.getPosition().y;
 
+			int dir_x = sign(totalMovement.x);
+			int dir_y = sign(totalMovement.y);
+
+			cout << dir_x << " " << dir_y << endl;
+
+			if (lookAtMouse(dir_x, dir_y) == look::up)
+			{
+				CurrentFrame += 0.005*time;
+				if (CurrentFrame > 8)
+					CurrentFrame -= 8;
+				hero_sprite.setTextureRect(IntRect(128 * int(CurrentFrame), 254, 128, 128));
+				hero_sprite.move(totalMovement * (1.f / 1000.f));
+			}
+			if (lookAtMouse(dir_x, dir_y) == look::down)
+			{
+				CurrentFrame += 0.005*time;
+				if (CurrentFrame > 8)
+					CurrentFrame -= 8;
+				hero_sprite.setTextureRect(IntRect(128 * int(CurrentFrame), 762, 128, 128));
+				hero_sprite.move(totalMovement * (1.f / 1000.f));
+			}
+			else if (lookAtMouse(dir_x, dir_y) == look::left)
+			{
+				CurrentFrame += 0.005*time;
+				if (CurrentFrame > 8)
+					CurrentFrame -= 8;
+				hero_sprite.setTextureRect(IntRect(128 * int(CurrentFrame), 0, 128, 128));
+				hero_sprite.move(totalMovement * (1.f / 1000.f));
+			}
+			else if (lookAtMouse(dir_x, dir_y) == look::right)
+			{
+				CurrentFrame += 0.005*time;
+				if (CurrentFrame > 8)
+					CurrentFrame -= 8;
+				hero_sprite.setTextureRect(IntRect(128 * int(CurrentFrame), 508, 128, 128));
+				hero_sprite.move(totalMovement * (1.f / 1000.f));
+			}
+			else if (lookAtMouse(dir_x, dir_y) == look::downright)
+			{
+				CurrentFrame += 0.005*time; 
+				if (CurrentFrame > 8) 
+					CurrentFrame -= 8;
+				hero_sprite.setTextureRect(IntRect(128 * int(CurrentFrame), 635, 128, 128)); 
+				hero_sprite.move(totalMovement * (1.f / 1000.f));
+			}
+			else if (lookAtMouse(dir_x, dir_y) == look::upright)
+			{
+				CurrentFrame += 0.005*time;
+				if (CurrentFrame > 8)
+					CurrentFrame -= 8;
+				hero_sprite.setTextureRect(IntRect(128 * int(CurrentFrame), 381, 128, 128));
+				hero_sprite.move(totalMovement * (1.f / 1000.f));
+			}
+			else if (lookAtMouse(dir_x, dir_y) == look::upleft)
+			{
+				CurrentFrame += 0.005*time;
+				if (CurrentFrame > 8)
+					CurrentFrame -= 8;
+				hero_sprite.setTextureRect(IntRect(128 * int(CurrentFrame), 127, 128, 128));
+				hero_sprite.move(totalMovement * (1.f / 1000.f));
+			}
+			else if (lookAtMouse(dir_x, dir_y) == look::downleft)
+			{
+				CurrentFrame += 0.005*time;
+				if (CurrentFrame > 8)
+					CurrentFrame -= 8;
+				hero_sprite.setTextureRect(IntRect(128 * int(CurrentFrame), 889, 128, 128));
+				hero_sprite.move(totalMovement * (1.f / 1000.f));
+			}
+				
+		}
+
+		
+		window.clear(Color::White);
+		window.draw(hero_sprite);
+		window.display();
 	}
 
 	return 0;
