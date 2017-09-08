@@ -45,45 +45,50 @@ enum look
 	right, left, down, up, downright, upright, upleft, downleft
 };
 
+bool is_equal(double x, double y) 
+{
+	return std::fabs(x - y) < std::numeric_limits<double>::epsilon();
+}
+
 template <class Value>
 int sign(Value Val)
 {
-	if (Val == 0.)  return 0;
+	if (is_equal(Val, 0.))  return 0;
 	if (Val >  0.)  return 1;
 	else return -1;
 }
 
 look lookAtMouse(int x, int y)
 {
-	if (x == 1 )
+	if (x == 1 && y == 0)
 	{
 		return look::right;
 	}
-	if (x == -1)
+	else if (x == -1 && y == 0)
 	{
 		return look::left;
 	}
-	if (y == -1)
+	else if (x == 0 && y == 1)
 	{
 		return look::down;
 	}
-	if (y == 1)
+	else if (x == 0 && y == -1)
 	{
 		return look::up;
 	}
-	if (x == 1 && y == 1)
+	else if (x == 1 && y == 1)
 	{
 		return look::downright;
 	}
-	if (x == 1 && y == -1)
+	else if (x == 1 && y == -1)
 	{
 		return look::upright;
 	}
-	if (x == -1 && y == -1)
+	else if (x == -1 && y == -1)
 	{
 		return look::upleft;
 	}
-	if (x == -1 && y == 1)
+	else if (x == -1 && y == 1)
 	{
 		return look::downleft;
 	}
@@ -133,8 +138,8 @@ int main()
 			totalMovement.x = Mouse::getPosition(window).x - hero_sprite.getPosition().x;
 			totalMovement.y = Mouse::getPosition(window).y - hero_sprite.getPosition().y;
 
-			int dir_x = sign(totalMovement.x);
-			int dir_y = sign(totalMovement.y);
+			double dir_x = sign(totalMovement.x);
+			double dir_y = sign(totalMovement.y);
 
 			cout << dir_x << " " << dir_y << endl;
 
@@ -146,7 +151,7 @@ int main()
 				hero_sprite.setTextureRect(IntRect(128 * int(CurrentFrame), 254, 128, 128));
 				hero_sprite.move(totalMovement * (1.f / 1000.f));
 			}
-			if (lookAtMouse(dir_x, dir_y) == look::down)
+			else if (lookAtMouse(dir_x, dir_y) == look::down)
 			{
 				CurrentFrame += 0.005*time;
 				if (CurrentFrame > 8)
