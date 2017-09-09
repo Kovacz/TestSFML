@@ -1,6 +1,7 @@
 #include <iostream>
 #include <windows.h>
 #include <SFML\Graphics.hpp>
+#include "level.h"
 #define MTR_2PI_F 6.283185307179586f
 #define MTR_RADIAN_F 57.295779513082320876798154814105f
 #define step 100
@@ -12,6 +13,31 @@ enum look
 {
 	right, left, down, up, downright, upright, upleft, downleft
 };
+
+FloatRect getRect(float x, float y, float w, float h)
+{//ф-ция получения прямоугольника. его коорд,размеры (шир,высот).
+	return FloatRect(x, y, w, h);//эта ф-ция нужна для проверки столкновений 
+}
+
+//void checkCollisionWithMap(float &Dx, float &Dy, Object &object, Sprite &hero)
+//{
+//	float x = hero.getPosition().x;
+//	float y = hero.getPosition().y;
+//	float w = 125;
+//	float h = 125;
+//	bool onGround = false;
+//
+//		if (getRect(x, y, w, h).intersects(object.rect))//проверяем пересечение игрока с объектом
+//		{
+//			if (object.name == "solid")//если встретили препятствие
+//			{
+//				if (Dy>0) { y = object.rect.top - h;  dy = 0; onGround = true; }
+//				if (Dy<0) { y = object.rect.top + object.rect.height;   dy = 0; }
+//				if (Dx>0) { x = object.rect.left - w; }
+//				if (Dx<0) { x = object.rect.left + object.rect.width; }
+//			}
+//		}
+//}
 
 float mtrAngle_f(float x, float y)
 {
@@ -26,11 +52,17 @@ float mtrAngle_f(float x, float y)
 
 void animation(float &CurrentFrame, float &time, Sprite &hero_sprite, Vector2f &totalMovement, int scale)
 {
-	CurrentFrame += 0.005 * time;
-	if (CurrentFrame > 8)
-		CurrentFrame -= 8;
-	hero_sprite.setTextureRect(IntRect(128 * int(CurrentFrame), scale, 128, 128));
-	hero_sprite.move(totalMovement* time * 0.001f);
+	//if (totalMovement.x != 0 && totalMovement.y != 0)
+	//{
+
+		CurrentFrame += 0.005 * time;
+		if (CurrentFrame > 8)
+			CurrentFrame -= 8;
+		hero_sprite.setTextureRect(IntRect(127 * int(CurrentFrame), scale, 125, 125));
+		hero_sprite.move(totalMovement* time * 0.001f);
+
+		
+	//}
 }
 
 void checkStep(Vector2f &totalMovement)
@@ -60,7 +92,7 @@ look lookAtMouse(int x, int y)
 	{
 		return look::right;
 	}
-	if (direction > 270.5f && direction <= 290.0f)
+	if (direction > 250.5f && direction <= 300.0f)
 	{
 		return look::down;
 	}
@@ -84,7 +116,7 @@ look lookAtMouse(int x, int y)
 	{
 		return look::upleft;
 	}
-	if (direction > 220.5f && direction <= 290.5f)
+	if (direction > 220.5f && direction <= 250.5f)
 	{
 		return look::downleft;
 	}
@@ -93,17 +125,22 @@ look lookAtMouse(int x, int y)
 int main()
 {
 	RenderWindow window(VideoMode(800, 600), "SFML works!");
+	View view;
+	view.reset(FloatRect(0, 0, 800, 600));
+
+	Level level;
+	level.LoadFromFile("map.tmx");
 
 	Texture hero_texture;
 	hero_texture.loadFromFile("textures/heroes/lol.png");
 
 	Sprite hero_sprite;
 	hero_sprite.setTexture(hero_texture);
-	hero_sprite.setTextureRect(IntRect(900, 765, 127, 127));
+	hero_sprite.setTextureRect(IntRect(500, 750, 125, 125));
 	hero_sprite.setOrigin(50, 50);
 	hero_sprite.setPosition(250, 250);
-	hero_sprite.setRotation(0);
 
+	//Object object;
 
 	float CurrentFrame = 0;
 	Clock clock;
@@ -122,50 +159,61 @@ int main()
 		if ( Mouse::isButtonPressed(Mouse::Right) )
 		{
 			
-			Vector2f totalMovement;
+			Vector2i totalMovement;
 			totalMovement.x = Mouse::getPosition(window).x - hero_sprite.getPosition().x;
 			totalMovement.y = Mouse::getPosition(window).y - hero_sprite.getPosition().y;
+			Vector2f pos = window.mapPixelToCoords(totalMovement);
 
-			cout << mtrAngle_f(totalMovement.x, totalMovement.y) << endl;
+			float x = pos.x;
+			float y = pos.y;
 
+			float direction = mtrAngle_f(pos.x, pos.y);
 
-			if (lookAtMouse(totalMovement.x, totalMovement.y) == look::up)
+			cout << direction << endl;
+
+			checkStep(pos);
+
+			if (lookAtMouse(pos.x, pos.y) == look::up)
 			{
-				animation(CurrentFrame, time, hero_sprite, totalMovement, 254);
+				animation(CurrentFrame, time, hero_sprite, pos, 250);
 			}
-			else if (lookAtMouse(totalMovement.x, totalMovement.y) == look::down)
+			else if (lookAtMouse(pos.x, pos.y) == look::down)
 			{
-				animation(CurrentFrame, time, hero_sprite, totalMovement, 762);
+				animation(CurrentFrame, time, hero_sprite, pos, 750);
 			}
-			else if (lookAtMouse(totalMovement.x, totalMovement.y) == look::left)
+			else if (lookAtMouse(pos.x, pos.y) == look::left)
 			{
-				animation(CurrentFrame, time, hero_sprite, totalMovement, 0);
+				animation(CurrentFrame, time, hero_sprite, pos, 0);
 			}
-			else if (lookAtMouse(totalMovement.x, totalMovement.y) == look::right)
+			else if (lookAtMouse(pos.x, pos.y) == look::right)
 			{
-				animation(CurrentFrame, time, hero_sprite, totalMovement, 508);
+				animation(CurrentFrame, time, hero_sprite, pos, 500);
 			}
-			else if (lookAtMouse(totalMovement.x, totalMovement.y) == look::downright)
+			else if (lookAtMouse(pos.x, pos.y) == look::downright)
 			{
-				animation(CurrentFrame, time, hero_sprite, totalMovement, 635);
+				animation(CurrentFrame, time, hero_sprite, pos, 625);
 			}
-			else if (lookAtMouse(totalMovement.x, totalMovement.y) == look::upright)
+			else if (lookAtMouse(pos.x, pos.y) == look::upright)
 			{
-				animation(CurrentFrame, time, hero_sprite, totalMovement, 381);
+				animation(CurrentFrame, time, hero_sprite, pos, 375);
 			}
-			else if (lookAtMouse(totalMovement.x, totalMovement.y) == look::upleft)
+			else if (lookAtMouse(pos.x, pos.y) == look::upleft)
 			{
-				animation(CurrentFrame, time, hero_sprite, totalMovement, 127);
+				animation(CurrentFrame, time, hero_sprite, pos, 125);
 			}
-			else if (lookAtMouse(totalMovement.x, totalMovement.y) == look::downleft)
+			else if (lookAtMouse(pos.x, pos.y) == look::downleft)
 			{
-				animation(CurrentFrame, time, hero_sprite, totalMovement, 889);
+				animation(CurrentFrame, time, hero_sprite, pos, 875);
 			}
 				
 		}
 
-		
-		window.clear(Color::White);
+		view.setCenter(hero_sprite.getPosition());
+		window.setView(view);
+
+		window.clear(Color(77, 83, 140));
+		level.Draw(window);
+
 		window.draw(hero_sprite);
 		window.display();
 	}
