@@ -33,13 +33,13 @@ public:
 		sprite.setTexture(texture);
 		sprite.setOrigin(w / 2, h / 2);
 		sprite.setPosition(px, py);
-		obj = level.GetAllObjects();//инициализируем.получаем все объекты для взаимодействия персонажа с картой
+		obj = level.GetAllObjects();
 		sprite.setTextureRect(IntRect(500, 750, w, h));
 	}
 
-	FloatRect getRect() //ф-ция получения прямоугольника. его коорд,размеры (шир,высот).
+	FloatRect getRect() 
 	{	
-		return FloatRect(x, y, width, height);//эта ф-ция нужна для проверки столкновений 
+		return FloatRect(x, y, width, height);
 	}
 
 	float mtrAngle_f(float x, float y)
@@ -122,22 +122,19 @@ public:
 
 	void checkCollisionWithMap(float Dx, float Dy)
 	{
-		
+
 		for (int i = 0; i < obj.size(); i++)
 		{
-			//cout << getRect().intersects(obj[i].rect) << endl;
 			if (getRect().intersects(obj[i].rect))
 			{
 				if (obj[i].name == "solid")
 				{
-					cout << "YES" << endl;
-					//if (lookAtMouse(Dx, Dy) == look::up) { y = obj[i].rect.top - height;  dy = 0; on_ground = true;   }
-					//if (Dy < 0) { y = obj[i].rect.top + obj[i].rect.height;   dy = 0; }
-					//if (Dx > 0) { x = obj[i].rect.left - width; }
-					//if (Dx < 0) { x = obj[i].rect.left + obj[i].rect.width; }
+					cout << "solid" << endl;
 				}
 				if (obj[i].name == "grass")
-					cout << "No" << endl;
+				{
+					cout << "grass" << endl;
+				}
 			}
 		}
 	}
