@@ -178,7 +178,7 @@ bool Level::LoadFromFile(std::string filename)//двоеточия-обраще�
 		float poY = 0.5;
 
 		float maxx;
-		maxx = (width / 2) ;
+		maxx = (width / 2);
 
 		while (tileElement)
 		{
@@ -191,7 +191,7 @@ bool Level::LoadFromFile(std::string filename)//двоеточия-обраще�
 				sf::Sprite sprite;
 				sprite.setTexture(tilesetImage);
 				sprite.setTextureRect(subRects[subRectToUse]);
-				sprite.setPosition(x *tileWidth, y * tileHeight);
+				sprite.setPosition(x * tileWidth, y * tileHeight);
 				sprite.setColor(sf::Color(255, 255, 255, layer.opacity));
 
 				layer.tiles.push_back(sprite);//закидываем в слой спрайты тайлов
@@ -272,8 +272,8 @@ bool Level::LoadFromFile(std::string filename)//двоеточия-обраще�
 
 
 
-				sf::Rect <float> objectRect;
-				objectRect.top = (y + x) / 2;
+				sf::Rect<float> objectRect;
+				objectRect.top = (x + y) / 2;
 				objectRect.left = (x - y);
 				objectRect.height = height;
 				objectRect.width = width;
@@ -351,8 +351,12 @@ void Level::Draw(sf::RenderWindow &window)
 {
 	// рисуем все тайлы (объекты не рисуем!)
 	for (int layer = 0; layer < layers.size(); layer++)
+	{
 		for (int tile = 0; tile < layers[layer].tiles.size(); tile++)
+		{
 			window.draw(layers[layer].tiles[tile]);
+		}
+	}
 }
 
 #endif
