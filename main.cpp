@@ -122,7 +122,6 @@ public:
 
 	void checkCollisionWithMap(float Dx, float Dy)
 	{
-
 		for (int i = 0; i < obj.size(); i++)
 		{
 			if (getRect().intersects(obj[i].rect))
@@ -131,10 +130,12 @@ public:
 				{
 					cout << "solid" << endl;
 				}
-				if (obj[i].name == "grass")
+				else if (obj[i].name == "grass")
 				{
 					cout << "grass" << endl;
 				}
+				else 
+					cout << " " << endl;
 			}
 		}
 	}
@@ -146,6 +147,7 @@ int main()
 	RenderWindow window(VideoMode(800, 600), "SFML works!");
 	View view;
 	view.reset(FloatRect(0, 0, 800, 600));
+	//view.rotate(90);
 
 	Level level;
 	level.LoadFromFile("map.tmx");
@@ -181,8 +183,10 @@ int main()
 
 			float dx, dy = player.speed;
 
+			player.x = player.sprite.getPosition().x;
+			player.y = player.sprite.getPosition().y;
+
 			player.checkCollisionWithMap(pos.x, pos.y);
-			//player.checkCollisionWithMap(0, dy);
 
 			if (player.lookAtMouse(pos.x, pos.y) == look::up)
 			{
