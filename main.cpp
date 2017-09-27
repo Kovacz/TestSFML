@@ -8,6 +8,10 @@
 #define MTR_RADIAN_F 57.295779513082320876798154814105f
 #define step 100
 
+const int HEIGHT_MAP = 25;
+const int WIDTH_MAP = 40;
+const int tile_size = 32;
+
 using namespace sf;
 using namespace std;
 
@@ -16,10 +20,38 @@ enum look
 	right, left, down, up, downRight, upRight, upLeft, downLeft
 };
 
+String TileMap[HEIGHT_MAP] = {
+	"0000000000000000000000000000000000000000",
+	"0                                      0",
+	"0   s                                  0",
+	"0                                      0",
+	"0                                      0",
+	"0                                      0",
+	"0                                      0",
+	"0                                      0",
+	"0                                      0",
+	"0                                      0",
+	"0                                      0",
+	"0                                      0",
+	"0                                      0",
+	"0                                      0",
+	"0                                      0",
+	"0                                      0",
+	"0                                      0",
+	"0                                      0",
+	"0                                      0",
+	"0                                      0",
+	"0                                      0",
+	"0                                      0",
+	"0                                      0",
+	"0                                      0",
+	"0000000000000000000000000000000000000000",
+};
+
 class Entity
 {
 public:
-	float x, y, frame, speed;
+	float x, y, frame, speed, angle;
 	int width, height;
 	bool isMove;
 	Texture texture;
@@ -29,9 +61,13 @@ public:
 	{
 		texture.loadFromImage(image);
 		sprite.setTexture(texture);
-		sprite.setOrigin(w / 2.f, h / 2.f);
+		//sprite.setOrigin(w / 2.f, h / 2.f);
 		sprite.setPosition(dx, dy);
 		sprite.setTextureRect(IntRect(500, 750, w, h));
+	}
+
+	FloatRect getRect() {
+		return FloatRect(x, y, width, height);
 	}
 
 	void animation(float &time, Vector2f &totalMovement, int scale)
@@ -40,7 +76,7 @@ public:
 		if (frame > 8)
 			frame -= 8;
 		sprite.setTextureRect(IntRect(127 * int(frame), scale, width, height));
-		sprite.move(totalMovement);
+		sprite.move(totalMovement );
 	}
 
 	void update(Vector2f mouseCoords, float deltaTime)
@@ -50,86 +86,79 @@ public:
 
 		float distance = sqrt(pow(mouseCoords.x - x, 2) + pow(mouseCoords.y - y, 2));
 		float angleInRadians = atan2(mouseCoords.y - y, mouseCoords.x - x);
-		float angle = angleInRadians * 180 / PI;
+		angle = angleInRadians * 180 / PI;
 
 		Vector2f movement = Vector2f(cos(angleInRadians), sin(angleInRadians));
 
 		const float DEAD_ZONE = 2;
-		if (distance > DEAD_ZONE)
-		{
-			if (lookAtMouse(angle) == look::up)
-			{
-				animation(deltaTime, movement, 250);
-			}
-			else if (lookAtMouse(angle) == look::down)
-			{
-				animation(deltaTime, movement, 750);
-			}
-			else if (lookAtMouse(angle) == look::left)
-			{
-				animation(deltaTime, movement, 0);
-			}
-			else if (lookAtMouse(angle) == look::right)
-			{
-				animation(deltaTime, movement, 500);
-			}
-			else if (lookAtMouse(angle) == look::downRight)
-			{
-				animation(deltaTime, movement, 625);
-			}
-			else if (lookAtMouse(angle) == look::upRight)
-			{
-				animation(deltaTime, movement, 375);
-			}
-			else if (lookAtMouse(angle) == look::upLeft)
-			{
-				animation(deltaTime, movement, 125);
-			}
-			else if (lookAtMouse(angle) == look::downLeft)
-			{
-				animation(deltaTime, movement, 875);
-			}
+		if (distance > DEAD_ZONE) {
+
+			int scale_values[] = {
+				/* right*/        500,
+				/* left*/           0,
+				/* down*/         750,
+				/* up*/           250,
+				/* downRight*/    625,
+				/* upRight*/      375,
+				/* upLeft*/       125,
+				/* downLeft*/     875
+			};
+
+			animation(deltaTime, movement, scale_values[lookAtMouse(angle)]);
+
+		} else { 
+			isMove = false; 
+			cout << "G" << endl; 
 		}
-		else { isMove = false; cout << "G" << endl; }
 	}
 
 	look lookAtMouse(float angle)
 	{
-		if (angle > -30.f && angle <= 30.f)
-		{
-			return look::right;
+		int breaking_values[][2] = {
+			{ -160, look::left },
+			{ -120, look::upLeft },
+			{ -80 , look::up },
+			{ -30 , look::upRight },
+			{  30 , look::right },
+			{  70 , look::downRight },
+			{  120, look::down },
+			{  160, look::downLeft },
+			{  180, look::left }
+		};
+
+		if (angle > -180.f) {
+			for (int i = 0; i < sizeof(breaking_values) / sizeof(breaking_values[0]); ++i) {
+				if (static_cast<int>(angle) <= breaking_values[i][0]) { 
+					return static_cast<look>(breaking_values[i][1]);
+				}
+			}
+		} else {
+			cout << "Error" << endl;
 		}
-		if (angle > 70.f && angle <= 120.f)
-		{
-			return look::down;
-		}
-		if (angle > 160.f && angle <= 180.f)
-		{
-			return look::left;
-		}
-		if (angle > -180.f && angle <= -160.f)
-		{
-			return look::left;
-		}
-		if (angle > -120.f && angle <= -80.f)
-		{
-			return look::up;
-		}
-		if (angle > 30.f && angle <= 70.f)
-		{
-			return look::downRight;
-		}
-		if (angle > -80.f && angle <= -30.f)
-		{
-			return look::upRight;
-		}
-		if (angle > -160.f && angle <= -120.f)
-		{
-			return look::upLeft;
-		}
-		if (angle > 120.f && angle <= 160.f)
-		{
-			return look::downLeft;
+	}
+
+	void interactionWithMap()
+	{
+		for (int i = y / tile_size; i < (y + height) / tile_size; ++i) {
+			for (int j = x / tile_size; j < (x + width) / tile_size; ++j) {
+				if (TileMap[i][j] == '0') {
+					if (lookAtMouse(angle) == look::down) {
+						sprite.setPosition(sprite.getPosition().x, i * tile_size - height);
+					}
+					if (lookAtMouse(angle) == look::up) {
+						sprite.setPosition(sprite.getPosition().x, i * tile_size + tile_size);
+					}
+					if (lookAtMouse(angle) == look::right) {
+						sprite.setPosition(j * tile_size - width, sprite.getPosition().y);
+					}
+					if (lookAtMouse(angle) == look::left) {
+						sprite.setPosition(j * tile_size + tile_size, sprite.getPosition().y);
+					}
+				}
+				if (TileMap[i][j] == 's') { 
+					TileMap[i][j] = ' ';
+				}
+			}
 		}
 	}
 };
@@ -142,19 +171,16 @@ int main()
 
 	View view;
 	view.reset(FloatRect(0, 0, 800, 600));
-
-	Texture tile;
-	tile.loadFromFile("textures/map/grassland/grassland.png");
-	tile.setSmooth(true);
-
-	Sprite floor(tile);
-	floor.setPosition(350, 250);
-	floor.setTextureRect(IntRect(0, 0, 64, 32));
-
 	Image hero_image;
 	hero_image.loadFromFile("textures/heroes/lol.png");
+	Image map_image;
+	map_image.loadFromFile("textures/map/map.png");
+	Texture map;
+	map.loadFromImage(map_image);
+	Sprite s_map;
+	s_map.setTexture(map);
 	
-	Entity player(hero_image, 0, 250, 125, 125);
+	Entity player(hero_image, 250, 250, 125, 125);
 
 	Clock clock;
 	float time = 0.f;
@@ -166,16 +192,15 @@ int main()
 	float tempX = 0.f, tempY = 0.f;
 	Vector2f pos;
 	////////////////////////////////////////
-	while (window.isOpen())
-	{
+	while (window.isOpen()) {
 		Vector2i mouseCoord = Mouse::getPosition(window);
 		Vector2f pixelPos = window.mapPixelToCoords(mouseCoord);
 		////////////////////////////////////
 		Event event;
-		while (window.pollEvent(event))
-		{
-			if (event.type == Event::Closed)
+		while (window.pollEvent(event)) {
+			if (event.type == Event::Closed) {
 				window.close();
+			}
 		}
 		////////////////////////////////////
 		float newTime = clock.getElapsedTime().asSeconds();
@@ -183,20 +208,18 @@ int main()
 		currentTime = newTime;
 		accumulator += frameTime;
 		////////////////////////////////////
-		while (accumulator >= deltaTime)
-		{
+		while (accumulator >= deltaTime) {
 
-			if (Mouse::isButtonPressed(Mouse::Right))
-			{
+			if (Mouse::isButtonPressed(Mouse::Right)) {
 				player.isMove = true;
 				pos = pixelPos;
 			}
 
-			if (player.isMove)
-			{
+			if (player.isMove) {
 				player.update(pos, deltaTime);
 			}
 
+			player.interactionWithMap();
 
 			accumulator -= deltaTime;
 			time += deltaTime;
@@ -205,7 +228,24 @@ int main()
 		view.setCenter(player.sprite.getPosition());
 		window.setView(view);	
 		window.clear(Color(77, 83, 140));
-		window.draw(floor);
+
+		////////////////////////////////////
+		for (int i = 0; i < HEIGHT_MAP; i++) {
+			for (int j = 0; j < WIDTH_MAP; j++) {
+				if (TileMap[i][j] == ' ') {
+					s_map.setTextureRect(IntRect(0, 0, tile_size, tile_size));
+				}
+				if (TileMap[i][j] == 's') {
+					s_map.setTextureRect(IntRect(tile_size, 0, tile_size, tile_size));
+				}
+				if (TileMap[i][j] == '0') {
+					s_map.setTextureRect(IntRect(64, 0, tile_size, tile_size));
+				}
+				s_map.setPosition(static_cast<float>(j * tile_size), static_cast<float>(i * tile_size));
+				window.draw(s_map);
+			}
+		}
+		////////////////////////////////////
 		window.draw(player.sprite);
 
 		window.display();
