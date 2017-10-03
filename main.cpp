@@ -1,5 +1,6 @@
 #include <iostream>
 #include <sstream>
+#include <vector>
 #include <cmath>
 #include <SFML/Graphics.hpp>
 #include <Box2D/Box2D.h>
@@ -61,7 +62,6 @@ public:
 	{
 		texture.loadFromImage(image);
 		sprite.setTexture(texture);
-		//sprite.setOrigin(w / 2.f, h / 2.f);
 		sprite.setPosition(dx, dy);
 		sprite.setTextureRect(IntRect(500, 750, w, h));
 	}
@@ -73,10 +73,11 @@ public:
 	void animation(float &time, Vector2f &totalMovement, int scale)
 	{
 		frame += time * speed;
-		if (frame > 8)
+		if (frame > 8) {
 			frame -= 8;
+		}
 		sprite.setTextureRect(IntRect(127 * int(frame), scale, width, height));
-		sprite.move(totalMovement );
+		sprite.move(totalMovement);
 	}
 
 	void update(Vector2f mouseCoords, float deltaTime)
@@ -84,8 +85,10 @@ public:
 		x = sprite.getPosition().x;
 		y = sprite.getPosition().y;
 
-		float distance = sqrt(pow(mouseCoords.x - x, 2) + pow(mouseCoords.y - y, 2));
-		float angleInRadians = atan2(mouseCoords.y - y, mouseCoords.x - x);
+		Vector2f origin(x + width / 2, y + height / 2);
+
+		float distance = sqrt(pow(mouseCoords.x - origin.x, 2) + pow(mouseCoords.y - origin.y, 2));
+		float angleInRadians = atan2(mouseCoords.y - origin.y, mouseCoords.x - origin.x);
 		angle = angleInRadians * 180 / PI;
 
 		Vector2f movement = Vector2f(cos(angleInRadians), sin(angleInRadians));
@@ -117,8 +120,8 @@ public:
 		int breaking_values[][2] = {
 			{ -160, look::left },
 			{ -120, look::upLeft },
-			{ -80 , look::up },
-			{ -30 , look::upRight },
+			{ -50 , look::up },
+			{ -10 , look::upRight },
 			{  30 , look::right },
 			{  70 , look::downRight },
 			{  120, look::down },
@@ -137,28 +140,19 @@ public:
 		}
 	}
 
-	void interactionWithMap()
+	void interactionWithMap(Rect<float> &rect)
 	{
-		for (int i = y / tile_size; i < (y + height) / tile_size; ++i) {
-			for (int j = x / tile_size; j < (x + width) / tile_size; ++j) {
-				if (TileMap[i][j] == '0') {
-					if (lookAtMouse(angle) == look::down) {
-						sprite.setPosition(sprite.getPosition().x, i * tile_size - height);
-					}
-					if (lookAtMouse(angle) == look::up) {
-						sprite.setPosition(sprite.getPosition().x, i * tile_size + tile_size);
-					}
-					if (lookAtMouse(angle) == look::right) {
-						sprite.setPosition(j * tile_size - width, sprite.getPosition().y);
-					}
-					if (lookAtMouse(angle) == look::left) {
-						sprite.setPosition(j * tile_size + tile_size, sprite.getPosition().y);
-					}
-				}
-				if (TileMap[i][j] == 's') { 
-					TileMap[i][j] = ' ';
-				}
-			}
+		if (!rect.contains(x, y + height) && !rect.contains(x + width, y + height)) {
+			sprite.setPosition(x + 1, y - 1);
+		}
+		else if (!rect.contains(x, y) && !rect.contains(x, y + height)) {
+			sprite.setPosition(x + 1, y + 1);
+		}
+		else if (!rect.contains(x, y) && !rect.contains(x + width, y)) {
+			sprite.setPosition(x - 1, y + 1);
+		}
+		else if (!rect.contains(x + width, y) && !rect.contains(x + width, y + height)) {
+			sprite.setPosition(x - 1, y - 1);
 		}
 	}
 };
@@ -167,7 +161,7 @@ public:
 int main()
 {
 	RenderWindow window(VideoMode(800, 600), "SFML works!");
-	//window.setFramerateLimit(60);
+	//window.setFramerateLimit(120);
 
 	View view;
 	view.reset(FloatRect(0, 0, 800, 600));
@@ -191,6 +185,8 @@ int main()
 
 	float tempX = 0.f, tempY = 0.f;
 	Vector2f pos;
+
+	Rect<float> rect(s_map.getPosition().x, s_map.getPosition().y, WIDTH_MAP * tile_size, HEIGHT_MAP * tile_size);
 	////////////////////////////////////////
 	while (window.isOpen()) {
 		Vector2i mouseCoord = Mouse::getPosition(window);
@@ -219,27 +215,24 @@ int main()
 				player.update(pos, deltaTime);
 			}
 
-			player.interactionWithMap();
-
+			player.interactionWithMap(rect);
 			accumulator -= deltaTime;
 			time += deltaTime;
 		}
-
 		view.setCenter(player.sprite.getPosition());
 		window.setView(view);	
 		window.clear(Color(77, 83, 140));
-
 		////////////////////////////////////
 		for (int i = 0; i < HEIGHT_MAP; i++) {
 			for (int j = 0; j < WIDTH_MAP; j++) {
+				if (TileMap[i][j] == '0') {
+					s_map.setTextureRect(IntRect(64, 0, tile_size, tile_size));
+				}
 				if (TileMap[i][j] == ' ') {
 					s_map.setTextureRect(IntRect(0, 0, tile_size, tile_size));
 				}
 				if (TileMap[i][j] == 's') {
 					s_map.setTextureRect(IntRect(tile_size, 0, tile_size, tile_size));
-				}
-				if (TileMap[i][j] == '0') {
-					s_map.setTextureRect(IntRect(64, 0, tile_size, tile_size));
 				}
 				s_map.setPosition(static_cast<float>(j * tile_size), static_cast<float>(i * tile_size));
 				window.draw(s_map);
